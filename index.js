@@ -1,26 +1,38 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const axios = require('axios').create({
-    baseURL: "https://hcd.urbanissa.net"
-    // headers: {
-    //     'apikey': process.env.SMS_API_KEY
-    // }
-});
-
-const ax = async () => {
-    return await axios.post('/api/cd/exec', {
-        'message': `Prueba con axion`
-    });
-}
-// gp().then(d => {
-//     console.log(d);
-// })
-// .catch(e => {
-//     console.log(e);
-// });
+const https = require('https'); // https://hcd.urbanissa.net/api/cd/exec
 
 try {
-    ax().then(d => console.log('Axios', d) ).catch(e => console.log('Error', e));
+
+    const options = {
+        host: 'hcd.urbanissa.net',
+        port: 443,
+        path: '/api/cd/exec',
+        method: 'POST',
+        headers: {
+          'Accept': 'application/vnd.github.everest-preview+json',
+          'Content-Type': 'application/json; charset=UTF-8'
+        }
+    };
+
+    const request = https.request(options, (res) => {
+        
+        let data = '';
+
+        res.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        res.on('close', () => {
+            console.log('Added new test');
+            console.log(JSON.parse(data));
+        });
+    });
+
+    request.on('error', (e) => {
+        console.error(e);
+      });
+    request.end();
   // `who-to-greet` input defined in action metadata file
   const nameToGreet = core.getInput('who-to-greet');
   console.log(`Hello ${nameToGreet}!`);
